@@ -1,0 +1,35 @@
+@media(max-width:1223px){
+   .img
+   {float:left;
+    margin-top:29px;
+   }
+
+   .container .second h1
+   {margin-left: 0;
+   }
+   
+   .container .second h5
+   {display: inline-block;
+    margin-right: -36px
+   }
+
+   .container .second p
+   {margin-right: -434px;
+   }
+
+   .foot 
+   {flex-wrap: wrap;
+   }
+
+   .footer1 ul
+   {flex-wrap: wrap;
+   }
+
+   .container .second2
+   {width: fit-content;
+   }
+   .second2 div p
+   {display: none;
+   }
+
+}
