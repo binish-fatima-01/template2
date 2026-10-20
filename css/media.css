@@ -1,28 +1,34 @@
-@media(max-width:1223px){
+@media(max-width:600px){
    .img
    {float:left;
     margin-top:29px;
    }
 
    .container .second h1
-   {margin-left: 0;
+   {margin-left: -25px;
+   font-size: 26px;
    }
    
    .container .second h5
    {display: inline-block;
-    margin-right: -36px
+    margin-right: -36px;
    }
 
    .container .second p
-   {margin-right: -434px;
+   {margin-right: -316px;
    }
 
+   .img
+   {background-size: 800px 600px;
+
+   }
    .foot 
    {flex-wrap: wrap;
    }
 
    .footer1 ul
    {flex-wrap: wrap;
+    margin-left: 26px;
    }
 
    .container .second2
