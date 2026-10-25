@@ -1,0 +1,1430 @@
+/*
+Theme Name: Academia
+Theme URI: https://colorlib.com/wp/themes/academia/
+Author: Colorlib
+Author URI: https://colorlib.com/
+Description: A block theme for schools, universities, academies and online course providers. Ships a course library with filtering and search, instructor profiles, curriculum outlines, term timetables and enrolment pricing — eight colour palettes, five type pairings and full-site editing throughout. Works on its own, and reads course data from the Academia Library plugin when it is active.
+Requires at least: 6.6
+Tested up to: 7.0
+Requires PHP: 7.4
+Version: 1.1.1
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Update URI: https://updates.colorlib.com/theme/academia.json
+Text Domain: academia
+Tags: education, blog, portfolio, full-site-editing, block-patterns, block-styles, template-editing, wide-blocks, accessibility-ready, translation-ready, custom-colors, custom-menu, custom-logo, featured-images, threaded-comments, one-column, two-columns, right-sidebar, left-sidebar, rtl-language-support, sticky-post, theme-options
+
+Academia WordPress Theme, (C) 2026 Colorlib.
+Academia is distributed under the terms of the GNU GPL v2 or later.
+
+Academia bundles the following third-party resources:
+
+Manrope, Inter, Fraunces, Space Grotesk, Nunito and Poppins
+  Licence: SIL Open Font License 1.1
+  Source: https://fonts.google.com/
+  Each family's licence is at assets/fonts/<family>/OFL.txt
+
+Feather icons (assets/images/icons/*.svg)
+  Copyright (c) 2013-2023 Cole Bemis
+  Licence: MIT
+  Source: https://github.com/feathericons/feather
+
+Photographs in assets/images/*.avif
+  Licence: Unsplash Licence (https://unsplash.com/license)
+  Source: https://unsplash.com/
+*/
+
+/*
+ * Only rules theme.json cannot express live here. Anything that can be a
+ * global style, a block style or a section style belongs in theme.json or
+ * styles/*.json instead. This file is also loaded in the editor through
+ * add_editor_style(), so every selector has to work in the iframed canvas —
+ * where <body> carries .editor-styles-wrapper and theme CSS is injected
+ * unprefixed.
+ */
+
+/* -------------------------------------------------------------------------
+ * Reduced motion. Declared first so everything after it can animate freely.
+ * ---------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.001ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.001ms !important;
+		scroll-behavior: auto !important;
+	}
+}
+
+/* -------------------------------------------------------------------------
+ * Accessibility
+ * ---------------------------------------------------------------------- */
+.screen-reader-text {
+	border: 0;
+	clip-path: inset(50%);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	width: 1px;
+	word-wrap: normal !important;
+}
+
+.screen-reader-text:focus {
+	background-color: var(--wp--preset--color--base);
+	border-radius: 12px;
+	box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.6);
+	clip-path: none;
+	color: var(--wp--preset--color--primary);
+	display: block;
+	font-size: 0.875rem;
+	font-weight: 600;
+	height: auto;
+	left: 1rem;
+	line-height: normal;
+	padding: 0.9rem 1.2rem;
+	text-decoration: none;
+	top: 1rem;
+	width: auto;
+	z-index: 100000;
+}
+
+/* A visible focus ring everywhere, not just on links and buttons. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+	outline: 2px solid var(--wp--preset--color--primary);
+	outline-offset: 2px;
+}
+
+/* -------------------------------------------------------------------------
+ * The site's top-level regions meet flush.
+ *
+ * `.wp-site-blocks` is a flow container, so WordPress applies the root
+ * blockGap as `margin-block-start` on every top-level block after the first.
+ * That put a 20px strip of page background between the header and the content,
+ * and between the content and the footer — invisible where a white section
+ * happens to sit next to them, and an obvious white band where the gradient
+ * call-to-action meets the dark footer.
+ *
+ * Sections carry their own top and bottom padding, so these regions need no
+ * gap between them at all.
+ * ---------------------------------------------------------------------- */
+.wp-site-blocks > header,
+.wp-site-blocks > main,
+.wp-site-blocks > footer,
+.wp-site-blocks > .wp-block-template-part {
+	margin-block-end: 0;
+	margin-block-start: 0;
+}
+
+/* The same applies inside the content wrapper: the first section must start at
+ * the top edge and the last must end at the bottom, or the flush regions above
+ * simply move the gap one level down. */
+.wp-site-blocks > main > :first-child,
+.wp-block-post-content > :first-child {
+	margin-block-start: 0;
+}
+
+.wp-site-blocks > main > :last-child,
+.wp-block-post-content > :last-child {
+	margin-block-end: 0;
+}
+
+/* -------------------------------------------------------------------------
+ * Header. The row is a single line by contract: six menu items plus a CTA
+ * must not stack on a tablet, so nav stays nowrap and core's overlay
+ * breakpoint moves from 600px up to 1000px.
+ * ---------------------------------------------------------------------- */
+.academia-header-row {
+	flex-wrap: nowrap;
+}
+
+.academia-header-row .wp-block-navigation__container {
+	flex-wrap: nowrap;
+}
+
+@media (min-width: 1000px) {
+	.academia-header-row .wp-block-navigation__responsive-container-open:not(.always-shown) {
+		display: none;
+	}
+
+	.academia-header-row .wp-block-navigation__responsive-container:not(.hidden-by-default):not(.is-menu-open) {
+		display: block;
+	}
+}
+
+@media (max-width: 999px) {
+	.academia-header-row .wp-block-navigation__responsive-container-open {
+		display: flex;
+	}
+
+	.academia-header-row .wp-block-navigation__responsive-container:not(.is-menu-open) {
+		display: none;
+	}
+}
+
+/* Below 600px the nowrap row has to be allowed to shrink, or a long CTA label
+ * — or WooCommerce adding cart icons — pushes the button past the viewport.
+ * The button's padding is set inline by the header pattern, so only
+ * !important reaches it. */
+@media (max-width: 599px) {
+	.academia-header-row > .wp-block-group {
+		min-width: 0;
+	}
+
+	.academia-header-row .wp-block-site-title {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.academia-header-row .wp-block-button__link {
+		padding-left: 1rem !important;
+		padding-right: 1rem !important;
+	}
+}
+
+/* -------------------------------------------------------------------------
+ * Scheme toggle.
+ *
+ * An icon control, not a labelled pill. The first cut was a bordered button
+ * reading "Dark" sitting next to the primary call to action, which competed
+ * with it for attention and read as a status rather than a switch. This is a
+ * quiet 40px square that only asserts itself on hover, and the two icons
+ * cross-fade so the control shows the scheme you would get by pressing it.
+ * ---------------------------------------------------------------------- */
+.academia-scheme-toggle {
+	align-items: center;
+	background: transparent;
+	border: 0;
+	border-radius: 999px;
+	color: var(--wp--preset--color--muted);
+	cursor: pointer;
+	display: inline-grid;
+	flex: none;
+	height: 40px;
+	justify-items: center;
+	padding: 0;
+	place-items: center;
+	transition: background-color 0.18s ease, color 0.18s ease;
+	width: 40px;
+}
+
+.academia-scheme-toggle:hover,
+.academia-scheme-toggle:focus-visible {
+	background: color-mix(in srgb, var(--wp--preset--color--contrast) 7%, transparent);
+	color: var(--wp--preset--color--contrast);
+}
+
+/* Both icons occupy the same cell, so the button never changes width. */
+.academia-scheme-toggle svg {
+	grid-area: 1 / 1;
+	transition: opacity 0.18s ease, transform 0.25s ease;
+}
+
+.academia-scheme-toggle__moon {
+	opacity: 1;
+	transform: none;
+}
+
+.academia-scheme-toggle__sun {
+	opacity: 0;
+	transform: rotate(-45deg);
+}
+
+/* Pressed means dark is active, so offer the sun. */
+.academia-scheme-toggle[aria-pressed="true"] .academia-scheme-toggle__moon {
+	opacity: 0;
+	transform: rotate(45deg);
+}
+
+.academia-scheme-toggle[aria-pressed="true"] .academia-scheme-toggle__sun {
+	opacity: 1;
+	transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.academia-scheme-toggle svg {
+		transition: none;
+	}
+}
+
+/* A sticky header needs a background of its own, or content scrolls through it. */
+.academia-sticky {
+	backdrop-filter: saturate(180%) blur(12px);
+	background: color-mix(in srgb, var(--wp--preset--color--base) 88%, transparent);
+	border-bottom: 1px solid var(--wp--preset--color--divider);
+}
+
+/* -------------------------------------------------------------------------
+ * Grids. WP's grid layout keeps one column count at every width, so a row of
+ * five items in a four-up grid leaves one orphan on the last line. These
+ * utilities step down through counts that divide the item count evenly.
+ * ---------------------------------------------------------------------- */
+.academia-grid-2,
+.academia-grid-3,
+.academia-grid-4 {
+	display: grid;
+}
+
+.academia-grid-4 {
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.academia-grid-3 {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.academia-grid-2 {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 1200px) {
+	.academia-grid-4 {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 900px) {
+	.academia-grid-3 {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 600px) {
+	.academia-grid-2,
+	.academia-grid-3,
+	.academia-grid-4 {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+/* Cards in a Query Loop or a Columns row must reach the same height, or a
+ * short excerpt leaves its card floating above the row baseline. */
+.academia-equal .wp-block-post,
+.academia-equal > .wp-block-column,
+.academia-equal > .wp-block-group {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+.academia-equal .wp-block-post > *:last-child,
+.academia-equal > .wp-block-column > *:last-child {
+	margin-top: auto;
+}
+
+/* The hero photograph is a wide shot whose subject sits right of centre.
+ * A 4/5 crop taken from the middle is mostly empty wall, so the crop is
+ * biased toward the subject. Applied by class rather than in the pattern:
+ * object-position is not a block attribute, and raw inline CSS a block
+ * attribute does not back fails block validation. */
+.academia-hero-portrait img {
+	object-position: 72% center;
+}
+
+/* -------------------------------------------------------------------------
+ * Trust bar — one horizontal run of facts, not a section of columns.
+ * ---------------------------------------------------------------------- */
+.academia-trustbar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.academia-trustbar li {
+	align-items: center;
+	color: var(--wp--preset--color--muted);
+	display: flex;
+	flex: 1 1 260px;
+	font-size: var(--wp--preset--font-size--small);
+	gap: 0.7rem;
+	line-height: 1.45;
+	margin: 0;
+	padding: 0.35rem var(--wp--preset--spacing--40);
+}
+
+/* Rules between items, never before the first or after the last. */
+.academia-trustbar li + li {
+	border-inline-start: 1px solid var(--wp--preset--color--divider);
+}
+
+.academia-trustbar li:first-child {
+	padding-inline-start: 0;
+}
+
+.academia-trustbar li:last-child {
+	padding-inline-end: 0;
+}
+
+.academia-trustbar svg {
+	color: var(--wp--preset--color--primary);
+	flex: none;
+	height: 1.25rem;
+	width: 1.25rem;
+}
+
+/* Stacked, the vertical rules become horizontal ones. */
+@media (max-width: 781px) {
+	.academia-trustbar li {
+		flex-basis: 100%;
+		padding-inline: 0;
+	}
+
+	.academia-trustbar li + li {
+		border-inline-start: 0;
+		border-top: 1px solid var(--wp--preset--color--divider);
+		margin-top: 0.6rem;
+		padding-top: 0.6rem;
+	}
+}
+
+/* -------------------------------------------------------------------------
+ * Course cards
+ *
+ * The card is built from three groups, not a flat run of children: what it
+ * is, what it involves, and what it costs. Gaps inside a group are tight and
+ * gaps between groups are wide, because uniform spacing makes everything
+ * equidistant and therefore ungrouped — which is what the first cut did.
+ * ---------------------------------------------------------------------- */
+.academia-card {
+	background: var(--wp--preset--color--base);
+	border: 1px solid var(--wp--preset--color--divider);
+	border-radius: 20px;
+	box-shadow: var(--wp--preset--shadow--card);
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+	transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.academia-card:hover,
+.academia-card:focus-within {
+	border-color: color-mix(in srgb, var(--wp--preset--color--primary) 45%, var(--wp--preset--color--divider));
+	box-shadow: var(--wp--preset--shadow--lifted);
+	transform: translateY(-3px);
+}
+
+/* The image bleeds to the card edge; the card clips it, so no radius here. */
+.academia-card__media {
+	display: block;
+	line-height: 0;
+	/* A hairline under the image separates it from the body without a second
+	 * border showing through the card's rounded corners. */
+	border-bottom: 1px solid var(--wp--preset--color--divider);
+}
+
+.academia-card__media img {
+	aspect-ratio: 16 / 10;
+	display: block;
+	height: auto;
+	object-fit: cover;
+	width: 100%;
+}
+
+.academia-card__body {
+	display: flex;
+	flex-direction: column;
+	/* tight: these three lines are one thought */
+	gap: 0.5rem;
+	padding: var(--wp--preset--spacing--40) var(--wp--preset--spacing--40) 0;
+}
+
+.academia-card__eyebrow {
+	margin: 0 0 0.25rem;
+}
+
+.academia-card__title {
+	font-family: var(--wp--preset--font-family--heading);
+	font-size: var(--wp--preset--font-size--large);
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	line-height: 1.25;
+	margin: 0;
+}
+
+.academia-card__title a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.academia-card__title a:hover,
+.academia-card__title a:focus-visible {
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 3px;
+}
+
+.academia-card__summary {
+	color: var(--wp--preset--color--muted);
+	margin: 0;
+}
+
+/* Group two: the measurable facts. Sits away from the summary, close together
+ * internally, and takes the free space so the foot is pinned to the bottom. */
+.academia-card__facts {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	gap: 0.4rem;
+	padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--40) 0;
+}
+
+.academia-card__facts > * {
+	margin: 0;
+}
+
+/* Group three: the commitment, below a hairline so it reads as a footer
+ * rather than another line of detail. */
+.academia-card__foot {
+	align-items: center;
+	border-top: 1px solid var(--wp--preset--color--divider);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem 1rem;
+	justify-content: space-between;
+	margin-top: var(--wp--preset--spacing--40);
+	padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--40);
+}
+
+.academia-card__foot .academia-price {
+	margin: 0;
+}
+
+.academia-card__action {
+	border: 1px solid color-mix(in srgb, var(--wp--preset--color--primary) 40%, transparent);
+	border-radius: 12px;
+	color: var(--wp--preset--color--primary);
+	font-family: var(--wp--preset--font-family--heading);
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 600;
+	line-height: 1;
+	padding: 0.7rem 1.1rem;
+	text-decoration: none;
+	transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+	white-space: nowrap;
+}
+
+.academia-card__action:hover,
+.academia-card__action:focus-visible {
+	background: var(--wp--preset--color--primary);
+	border-color: var(--wp--preset--color--primary);
+	color: var(--wp--preset--color--base);
+}
+
+/* The meta row: duration, level, lessons. Wraps rather than truncating. */
+.academia-meta {
+	align-items: center;
+	color: var(--wp--preset--color--muted);
+	display: flex;
+	flex-wrap: wrap;
+	font-size: var(--wp--preset--font-size--small);
+	gap: 0.35rem 0.9rem;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.academia-meta li {
+	align-items: center;
+	display: flex;
+	gap: 0.4rem;
+	margin: 0;
+}
+
+.academia-meta svg {
+	flex: none;
+	height: 1em;
+	opacity: 0.7;
+	width: 1em;
+}
+
+/* Chips: category, level, "new". Pills are the only 999px radius in the theme
+ * besides avatars. */
+.academia-chip {
+	background: color-mix(in srgb, var(--wp--preset--color--primary) 10%, transparent);
+	border-radius: 999px;
+	color: var(--wp--preset--color--primary);
+	display: inline-block;
+	font-size: 0.78rem;
+	font-weight: 600;
+	letter-spacing: 0.01em;
+	line-height: 1.4;
+	padding: 0.3rem 0.7rem;
+	text-decoration: none;
+}
+
+a.academia-chip:hover,
+a.academia-chip:focus {
+	background: var(--wp--preset--color--primary);
+	color: var(--wp--preset--color--base);
+}
+
+.academia-chip.is-accent {
+	background: color-mix(in srgb, var(--wp--preset--color--accent) 12%, transparent);
+	color: var(--wp--preset--color--accent);
+}
+
+.academia-price {
+	font-family: var(--wp--preset--font-family--heading);
+	font-size: var(--wp--preset--font-size--large);
+	font-weight: 700;
+	line-height: 1;
+}
+
+.academia-price s {
+	color: var(--wp--preset--color--muted);
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 400;
+	margin-inline-end: 0.4rem;
+}
+
+.academia-price-free {
+	color: var(--wp--preset--color--primary);
+}
+
+/* A star row that does not need an icon font. */
+.academia-stars {
+	color: var(--wp--preset--color--accent);
+	font-size: 0.95rem;
+	letter-spacing: 0.05em;
+	line-height: 1;
+}
+
+.academia-rating {
+	align-items: center;
+	display: flex;
+	gap: 0.4rem;
+}
+
+.academia-rating > span:last-child {
+	color: var(--wp--preset--color--muted);
+	font-size: var(--wp--preset--font-size--small);
+}
+
+/* -------------------------------------------------------------------------
+ * Course filter (rendered by the Academia Library plugin, styled here so the
+ * theme owns the look whether or not the plugin is active).
+ * ---------------------------------------------------------------------- */
+.academia-filter {
+	display: grid;
+	gap: var(--wp--preset--spacing--30);
+	grid-template-columns: 2fr repeat(3, 1fr);
+}
+
+@media (max-width: 900px) {
+	.academia-filter {
+		grid-template-columns: 1fr 1fr;
+	}
+}
+
+@media (max-width: 600px) {
+	.academia-filter {
+		grid-template-columns: 1fr;
+	}
+}
+
+.academia-filter label {
+	display: block;
+	font-size: 0.8rem;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	margin-bottom: 0.35rem;
+	text-transform: uppercase;
+}
+
+.academia-filter input[type="search"],
+.academia-filter select {
+	-webkit-appearance: none;
+	appearance: none;
+	background-color: var(--wp--preset--color--base);
+	border: 1px solid color-mix(in srgb, var(--wp--preset--color--contrast) 22%, transparent);
+	border-radius: 12px;
+	color: var(--wp--preset--color--contrast);
+	font-family: inherit;
+	font-size: var(--wp--preset--font-size--medium);
+	padding: 0.8rem 1rem;
+	width: 100%;
+}
+
+/* The chevron is a background image so no JS or icon font is needed. */
+.academia-filter select {
+	background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+	background-position: calc(100% - 20px) calc(50% + 2px), calc(100% - 15px) calc(50% + 2px);
+	background-repeat: no-repeat;
+	background-size: 5px 5px, 5px 5px;
+	padding-inline-end: 2.5rem;
+}
+
+.academia-filter-count {
+	color: var(--wp--preset--color--muted);
+	font-size: var(--wp--preset--font-size--small);
+}
+
+/* A result set being replaced should not flash. */
+.academia-results[data-wp-class--is-loading] {
+	transition: opacity 0.15s ease;
+}
+
+.academia-results.is-loading {
+	opacity: 0.5;
+}
+
+.academia-empty {
+	border: 1px dashed var(--wp--preset--color--divider);
+	border-radius: 20px;
+	padding: var(--wp--preset--spacing--60) var(--wp--preset--spacing--40);
+	text-align: center;
+}
+
+/* -------------------------------------------------------------------------
+ * Curriculum. core/accordion is WP 7.0; the <details> fallback below is what
+ * renders on 6.6, so both have to look the same.
+ * ---------------------------------------------------------------------- */
+.academia-curriculum {
+	border: 1px solid var(--wp--preset--color--divider);
+	border-radius: 20px;
+	overflow: hidden;
+}
+
+.academia-curriculum details {
+	border-bottom: 1px solid var(--wp--preset--color--divider);
+}
+
+.academia-curriculum details:last-child {
+	border-bottom: 0;
+}
+
+.academia-curriculum summary {
+	align-items: center;
+	cursor: pointer;
+	display: flex;
+	font-family: var(--wp--preset--font-family--heading);
+	font-weight: 600;
+	gap: 0.75rem;
+	justify-content: space-between;
+	list-style: none;
+	padding: 1.1rem var(--wp--preset--spacing--40);
+}
+
+.academia-curriculum summary::-webkit-details-marker {
+	display: none;
+}
+
+.academia-curriculum summary::after {
+	border-bottom: 2px solid currentColor;
+	border-right: 2px solid currentColor;
+	content: "";
+	flex: none;
+	height: 0.5rem;
+	rotate: 45deg;
+	transition: rotate 0.2s ease;
+	width: 0.5rem;
+}
+
+.academia-curriculum details[open] summary::after {
+	rotate: -135deg;
+}
+
+.academia-curriculum summary:hover {
+	background: var(--wp--preset--color--surface);
+}
+
+.academia-curriculum .academia-lessons {
+	list-style: none;
+	margin: 0;
+	padding: 0 var(--wp--preset--spacing--40) var(--wp--preset--spacing--40);
+}
+
+.academia-curriculum .academia-lessons li {
+	align-items: center;
+	border-top: 1px solid var(--wp--preset--color--divider);
+	display: flex;
+	gap: 0.75rem;
+	justify-content: space-between;
+	padding: 0.7rem 0;
+}
+
+/* -------------------------------------------------------------------------
+ * Stats counter. Paragraphs with .academia-count are animated by
+ * assets/js/counter.js, which functions.php enqueues only when one renders.
+ * ---------------------------------------------------------------------- */
+.academia-count {
+	font-family: var(--wp--preset--font-family--heading);
+	font-variant-numeric: tabular-nums;
+	font-weight: 800;
+	letter-spacing: -0.03em;
+	line-height: 1;
+}
+
+/* -------------------------------------------------------------------------
+ * Scroll-driven reveal. Replaces the AOS dependency the HTML template
+ * carried. Progressive: without animation-timeline support nothing is
+ * hidden, so there is no repeat of the opacity-0 blank-page failure.
+ * ---------------------------------------------------------------------- */
+@supports (animation-timeline: view()) {
+	@media (prefers-reduced-motion: no-preference) {
+		.academia-reveal {
+			animation: academia-reveal both linear;
+			animation-range: entry 0% entry 60%;
+			animation-timeline: view();
+		}
+
+		@keyframes academia-reveal {
+			from {
+				opacity: 0;
+				transform: translateY(1.25rem);
+			}
+
+			to {
+				opacity: 1;
+				transform: none;
+			}
+		}
+	}
+}
+
+/* -------------------------------------------------------------------------
+ * Native scroll-snap carousel. Replaces tiny-slider: no library, keyboard
+ * accessible because the track itself is focusable and scrollable.
+ * ---------------------------------------------------------------------- */
+.academia-rail {
+	-ms-overflow-style: none;
+	display: grid;
+	gap: var(--wp--preset--spacing--40);
+	grid-auto-columns: minmax(280px, 1fr);
+	grid-auto-flow: column;
+	overflow-x: auto;
+	overscroll-behavior-x: contain;
+	padding-bottom: 0.5rem;
+	scroll-snap-type: x mandatory;
+	scrollbar-width: thin;
+}
+
+.academia-rail > * {
+	scroll-snap-align: start;
+}
+
+@media (min-width: 1000px) {
+	.academia-rail.is-three-up {
+		grid-auto-columns: minmax(0, 1fr);
+		grid-auto-flow: row;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		overflow: visible;
+	}
+}
+
+/* -------------------------------------------------------------------------
+ * Content alignment. Post content is alignfull + constrained, so core floats
+ * .alignleft/.alignright to the container edge (= the viewport). Pull them
+ * back to the content column.
+ * ---------------------------------------------------------------------- */
+:where(.wp-block-post-content) > .alignleft {
+	margin-inline-start: max(0px, calc((100% - var(--wp--style--global--content-size)) / 2));
+}
+
+:where(.wp-block-post-content) > .alignright {
+	margin-inline-end: max(0px, calc((100% - var(--wp--style--global--content-size)) / 2));
+}
+
+/* -------------------------------------------------------------------------
+ * Classic content. Freeform HTML and shortcodes get no blockGap, so the
+ * rhythm and the [gallery]/[caption]/float/table styling are supplied here to
+ * match block output. Scoped so the same rules work in the iframed editor,
+ * and elements rendered by blocks (which carry a wp-block-* class) opt out.
+ * ---------------------------------------------------------------------- */
+:is(.wp-block-post-content, .wp-block-comment-content, .editor-styles-wrapper) :not([class*="wp-block-"]) > p:not([class*="wp-block-"]) {
+	margin-block: 0 1.25rem;
+}
+
+:is(.wp-block-post-content, .wp-block-comment-content) .gallery {
+	display: grid;
+	gap: var(--wp--preset--spacing--30);
+	grid-template-columns: repeat(var(--academia-gallery-cols, 3), minmax(0, 1fr));
+	margin-block: var(--wp--preset--spacing--40);
+}
+
+:is(.wp-block-post-content, .wp-block-comment-content) .gallery-columns-2 {
+	--academia-gallery-cols: 2;
+}
+
+:is(.wp-block-post-content, .wp-block-comment-content) .gallery-columns-4 {
+	--academia-gallery-cols: 4;
+}
+
+:is(.wp-block-post-content, .wp-block-comment-content) .gallery img {
+	border-radius: 14px;
+	display: block;
+	height: auto;
+	width: 100%;
+}
+
+:is(.wp-block-post-content, .wp-block-comment-content) .wp-caption {
+	margin-block: var(--wp--preset--spacing--40);
+	max-width: 100%;
+}
+
+:is(.wp-block-post-content, .wp-block-comment-content) .wp-caption-text {
+	color: var(--wp--preset--color--muted);
+	font-size: var(--wp--preset--font-size--small);
+	margin-block-start: 0.5rem;
+}
+
+:is(.wp-block-post-content, .wp-block-comment-content) img.alignleft,
+:is(.wp-block-post-content, .wp-block-comment-content) .alignleft img {
+	border-radius: 14px;
+}
+
+:is(.wp-block-post-content, .wp-block-comment-content) table:not([class*="wp-block-"]) {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+:is(.wp-block-post-content, .wp-block-comment-content) table:not([class*="wp-block-"]) :is(td, th) {
+	border: 1px solid var(--wp--preset--color--divider);
+	padding: 0.6rem 0.8rem;
+}
+
+:is(.wp-block-post-content, .wp-block-comment-content) dl dt {
+	font-weight: 600;
+}
+
+:is(.wp-block-post-content, .wp-block-comment-content) dl dd {
+	margin-block-end: 1rem;
+	margin-inline-start: 1.5rem;
+}
+
+/* -------------------------------------------------------------------------
+ * Query Loop pagination pills
+ * ---------------------------------------------------------------------- */
+.wp-block-query-pagination {
+	gap: 0.4rem;
+}
+
+.wp-block-query-pagination :is(.wp-block-query-pagination-numbers a, .wp-block-query-pagination-next, .wp-block-query-pagination-previous),
+.wp-block-query-pagination .page-numbers {
+	border: 1px solid var(--wp--preset--color--divider);
+	border-radius: 12px;
+	display: inline-block;
+	line-height: 1;
+	padding: 0.6rem 0.85rem;
+}
+
+.wp-block-query-pagination .page-numbers.current {
+	background: var(--wp--preset--color--primary);
+	border-color: var(--wp--preset--color--primary);
+	color: var(--wp--preset--color--base);
+}
+
+.wp-block-query-pagination :is(a):hover {
+	border-color: var(--wp--preset--color--primary);
+	color: var(--wp--preset--color--primary);
+}
+
+/* Post navigation links are a single line each, not a wrapped block. */
+.post-nav-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+}
+
+/* -------------------------------------------------------------------------
+ * Where two same-ground sections meet, draw a hairline so they do not read as
+ * one long column. apply_grounds.py alternates grounds to avoid this, but a
+ * user reordering sections in the editor can still produce it.
+ * ---------------------------------------------------------------------- */
+.academia-seam {
+	border-top: 1px solid var(--wp--preset--color--divider);
+}
+
+/* -------------------------------------------------------------------------
+ * Footer
+ *
+ * The footer note takes its colour from here rather than an inline rgba():
+ * the style engine drops rgba() from a dynamic block's colour attribute, so
+ * core/site-tagline renders has-text-color with no style at all.
+ * ---------------------------------------------------------------------- */
+.academia-footer-note {
+	color: rgba(255, 255, 255, 0.72);
+	margin: 0;
+}
+
+/* The brand column: title, tagline, contact facts, social. Each is a distinct
+ * thing, so they get real separation — and the contact block sits further from
+ * the tagline than its own rows are from each other. */
+.academia-footer-brand {
+	gap: 1.1rem !important;
+}
+
+.academia-footer-brand .academia-footer-contact {
+	margin-top: 0.2rem;
+}
+
+.academia-footer-brand .wp-block-social-links {
+	margin-top: 0.4rem;
+}
+
+/* Social icons at 16px read as specks on a dark ground. */
+.academia-footer-brand .wp-block-social-links .wp-block-social-link {
+	margin: 0;
+}
+
+.academia-footer-brand .wp-block-social-links a {
+	height: 20px;
+	opacity: 0.8;
+	transition: opacity 0.15s ease;
+	width: 20px;
+}
+
+.academia-footer-brand .wp-block-social-links a:hover,
+.academia-footer-brand .wp-block-social-links a:focus-visible {
+	opacity: 1;
+}
+
+.academia-footer-brand .wp-block-social-links svg {
+	height: 20px;
+	width: 20px;
+}
+
+/* A link column: the heading sits away from its list, not on top of it. */
+.academia-footer-col {
+	gap: 1rem !important;
+}
+
+/* A column heading, not a bolder link. Small, tracked and quieter than the
+ * links below it, so the eye reads "group label" before it reads the group. */
+.academia-footer-heading {
+	color: rgba(255, 255, 255, 0.55) !important;
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	margin: 0;
+	text-transform: uppercase;
+}
+
+/* The link lists. Without this they are `wp-block-list` with nothing else, so
+ * the browser gives them disc bullets and a 40px indent — a bulleted, indented
+ * list on a dark ground, which is what made the first footer look amateur. */
+.academia-footer-links {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.academia-footer-links li {
+	margin: 0;
+}
+
+.academia-footer-links a {
+	color: rgba(255, 255, 255, 0.78);
+	font-size: 0.9375rem;
+	text-decoration: none;
+	transition: color 0.15s ease;
+}
+
+.academia-footer-links a:hover,
+.academia-footer-links a:focus-visible {
+	color: var(--wp--preset--color--base);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+/* The contact facts give the brand column something to hold. Icons inherit
+ * currentColor, so they stay legible in every palette. */
+.academia-footer-contact {
+	display: flex;
+	flex-direction: column;
+	gap: 0.65rem;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.academia-footer-contact li {
+	align-items: flex-start;
+	color: rgba(255, 255, 255, 0.78);
+	display: flex;
+	font-size: 0.9375rem;
+	gap: 0.65rem;
+	line-height: 1.5;
+	margin: 0;
+}
+
+.academia-footer-contact svg {
+	color: var(--wp--preset--color--teal-light);
+	flex: none;
+	height: 1.05rem;
+	margin-top: 0.15rem;
+	width: 1.05rem;
+}
+
+/* The bottom bar's legal links: one row, separated by thin rules. */
+.academia-footer-legal {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0 1rem;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.academia-footer-legal li {
+	margin: 0;
+}
+
+.academia-footer-legal li + li {
+	border-inline-start: 1px solid rgba(255, 255, 255, 0.18);
+	padding-inline-start: 1rem;
+}
+
+.academia-footer-legal a {
+	color: rgba(255, 255, 255, 0.62);
+	font-size: 0.8125rem;
+	text-decoration: none;
+}
+
+.academia-footer-legal a:hover,
+.academia-footer-legal a:focus-visible {
+	color: var(--wp--preset--color--base);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+/* Four columns inside 782px leaves the link columns ~119px wide, which wraps
+ * "Fees and funding" onto two lines. Between the stacking breakpoint and
+ * 1000px the footer goes two-up instead: the brand takes a full row, the three
+ * link columns share the next. */
+@media (min-width: 782px) and (max-width: 999px) {
+	footer .wp-block-columns.alignwide {
+		flex-wrap: wrap !important;
+	}
+
+	footer .wp-block-columns.alignwide > .academia-footer-brand {
+		flex-basis: 100% !important;
+		margin-bottom: var(--wp--preset--spacing--50);
+	}
+
+	/* flex-basis as a percentage plus the 40px gap overflows the row, so the
+	 * third column wraps and then grows to full width on its own. A zero basis
+	 * with grow lets all three share whatever is left, gap included. */
+	footer .wp-block-columns.alignwide > .academia-footer-col {
+		flex: 1 1 0 !important;
+		min-width: 0;
+	}
+}
+
+/* Social icons sit level with the text above them, not inset by the block's
+ * own default gap. */
+footer .wp-block-social-links {
+	margin: 0;
+}
+
+/* core's is-style-squared targets the button wrapper while global styles put
+ * the radius on the link, so it has to be re-applied to the link. */
+.wp-block-button.is-style-squared .wp-block-button__link {
+	border-radius: 0;
+}
+
+.wp-block-button.is-style-academia-ghost .wp-block-button__link {
+	background: transparent;
+	border: 1px solid currentColor;
+	color: var(--wp--preset--color--primary);
+}
+
+.wp-block-button.is-style-academia-ghost .wp-block-button__link:hover,
+.wp-block-button.is-style-academia-ghost .wp-block-button__link:focus {
+	background: var(--wp--preset--color--primary);
+	border-color: var(--wp--preset--color--primary);
+	color: var(--wp--preset--color--base);
+}
+
+/* Comment template columns must be allowed to shrink or a long URL overflows. */
+.wp-block-comment-template .is-layout-flex > .wp-block-group {
+	flex-wrap: wrap;
+	min-width: 0;
+}
+
+/* Skip-link target must not hide under a sticky header. */
+:target {
+	scroll-margin-top: 6rem;
+}
+
+/* View transitions between pages, where the browser supports them. */
+@media (prefers-reduced-motion: no-preference) {
+	@view-transition {
+		navigation: auto;
+	}
+}
+
+
+/* =========================================================================
+ * Block style variations.
+ *
+ * These live in style.css rather than their own files behind a
+ * register_block_style() `style_handle`. That handle only enqueues when
+ * WordPress is serving separate core block assets, and a plugin can switch
+ * that off for the whole site — WooCommerce does it here — at which point
+ * every variation silently loses its CSS while still rendering its class.
+ * style.css always loads, so the styles always apply.
+ * ====================================================================== */
+
+/* List block styles: Checklist, Dashed, Numbered steps, Two columns. */
+
+/* --- Checklist ---------------------------------------------------------- */
+.wp-block-list.is-style-academia-checklist {
+	list-style: none;
+	padding-inline-start: 0;
+}
+
+.wp-block-list.is-style-academia-checklist > li {
+	position: relative;
+	padding-inline-start: 2.1em;
+}
+
+.wp-block-list.is-style-academia-checklist > li + li {
+	margin-top: 0.6em;
+}
+
+.wp-block-list.is-style-academia-checklist > li::before {
+	content: "";
+	position: absolute;
+	top: 0.15em;
+	inset-inline-start: 0;
+	width: 1.4em;
+	height: 1.4em;
+	border-radius: 50%;
+	background-color: var(--wp--preset--color--secondary, #4aca85);
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: 60%;
+}
+
+/* --- Dashed ------------------------------------------------------------- */
+.wp-block-list.is-style-academia-dash {
+	list-style: none;
+	padding-inline-start: 0;
+}
+
+.wp-block-list.is-style-academia-dash > li {
+	position: relative;
+	padding-inline-start: 1.6em;
+}
+
+.wp-block-list.is-style-academia-dash > li + li {
+	margin-top: 0.5em;
+}
+
+.wp-block-list.is-style-academia-dash > li::before {
+	content: "";
+	position: absolute;
+	top: 0.72em;
+	inset-inline-start: 0;
+	width: 0.8em;
+	height: 2px;
+	border-radius: 2px;
+	background-color: var(--wp--preset--color--primary, #5468d8);
+}
+
+/* --- Numbered steps ----------------------------------------------------- */
+.wp-block-list.is-style-academia-steps {
+	list-style: none;
+	padding-inline-start: 0;
+	counter-reset: academia-step;
+}
+
+.wp-block-list.is-style-academia-steps > li {
+	position: relative;
+	padding-inline-start: 2.8em;
+	counter-increment: academia-step;
+}
+
+.wp-block-list.is-style-academia-steps > li + li {
+	margin-top: 0.9em;
+}
+
+.wp-block-list.is-style-academia-steps > li::before {
+	content: counter(academia-step);
+	position: absolute;
+	top: 0;
+	inset-inline-start: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.9em;
+	height: 1.9em;
+	border-radius: 50%;
+	background-color: var(--wp--preset--color--primary, #5468d8);
+	color: var(--wp--preset--color--base, #fff);
+	font-family: var(--wp--preset--font-family--heading);
+	font-size: 0.8em;
+	font-weight: 600;
+	line-height: 1;
+}
+
+/* --- Two columns -------------------------------------------------------- */
+@media (min-width: 600px) {
+	.wp-block-list.is-style-academia-two-col {
+		columns: 2;
+		column-gap: var(--wp--preset--spacing--50, 2rem);
+	}
+
+	.wp-block-list.is-style-academia-two-col > li {
+		break-inside: avoid;
+	}
+}
+
+/* Image block styles: Device frame, Browser frame, Framed. */
+
+/* Phone bezel for app screenshots. */
+.wp-block-image.is-style-academia-device img {
+	border: 10px solid var(--wp--preset--color--contrast, #232323);
+	border-radius: 2rem;
+	box-shadow: var(--wp--preset--shadow--card-strong, 0 28px 56px -20px rgba(48, 49, 51, 0.3));
+	box-sizing: border-box;
+}
+
+/* Browser chrome for product screenshots. */
+.wp-block-image.is-style-academia-browser {
+	position: relative;
+	border: 1px solid var(--wp--preset--color--divider, #e4e7f0);
+	border-radius: 12px;
+	overflow: hidden;
+	box-shadow: var(--wp--preset--shadow--card, 0 12px 32px -8px rgba(48, 49, 51, 0.12));
+	background: var(--wp--preset--color--surface, #f5f7fc);
+	padding-top: 34px;
+}
+
+.wp-block-image.is-style-academia-browser::before {
+	content: "";
+	position: absolute;
+	inset: 0 0 auto 0;
+	height: 34px;
+	background: var(--wp--preset--color--surface, #f5f7fc);
+	border-bottom: 1px solid var(--wp--preset--color--divider, #e4e7f0);
+}
+
+.wp-block-image.is-style-academia-browser::after {
+	content: "";
+	position: absolute;
+	top: 13px;
+	inset-inline-start: 14px;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--wp--preset--color--divider, #e4e7f0);
+	box-shadow: 14px 0 0 var(--wp--preset--color--divider, #e4e7f0), 28px 0 0 var(--wp--preset--color--divider, #e4e7f0);
+}
+
+.wp-block-image.is-style-academia-browser img {
+	display: block;
+	width: 100%;
+}
+
+/* Simple inset frame. */
+.wp-block-image.is-style-academia-frame img {
+	border: 1px solid var(--wp--preset--color--divider, #e4e7f0);
+	border-radius: 12px;
+	padding: 10px;
+	background: var(--wp--preset--color--base, #fff);
+	box-sizing: border-box;
+}
+
+/* Quote block style: Testimonial card. */
+.wp-block-quote.is-style-academia-testimonial {
+	position: relative;
+	border: 1px solid var(--wp--preset--color--divider, #e4e7f0);
+	border-inline-start-width: 1px;
+	border-radius: 20px;
+	background: var(--wp--preset--color--base, #fff);
+	box-shadow: var(--wp--preset--shadow--card, 0 12px 32px -8px rgba(48, 49, 51, 0.12));
+	padding: var(--wp--preset--spacing--50, 2rem);
+	padding-top: calc(var(--wp--preset--spacing--50, 2rem) + 1.2em);
+}
+
+.wp-block-quote.is-style-academia-testimonial::before {
+	content: "\201C";
+	position: absolute;
+	top: 0.16em;
+	inset-inline-start: 0.4em;
+	color: var(--wp--preset--color--primary, #5468d8);
+	font-family: var(--wp--preset--font-family--heading);
+	font-size: 3.5em;
+	line-height: 1;
+	opacity: 0.28;
+}
+
+.wp-block-quote.is-style-academia-testimonial p {
+	font-size: var(--wp--preset--font-size--large);
+}
+
+.wp-block-quote.is-style-academia-testimonial cite {
+	display: block;
+	margin-top: 1em;
+	color: var(--wp--preset--color--muted, #6b7280);
+	font-size: var(--wp--preset--font-size--small);
+	font-style: normal;
+}
+
+/*
+ * core/details as a card — the FAQ shape.
+ *
+ * Loaded only when a Details block using the style renders, via the
+ * style_handle on register_block_style().
+ */
+.wp-block-details.is-style-academia-faq {
+	background: var(--wp--preset--color--base);
+	border: 1px solid var(--wp--preset--color--divider);
+	border-radius: 20px;
+	padding: 0;
+}
+
+.wp-block-details.is-style-academia-faq > summary {
+	align-items: center;
+	cursor: pointer;
+	display: flex;
+	font-family: var(--wp--preset--font-family--heading);
+	font-weight: 600;
+	gap: 0.75rem;
+	justify-content: space-between;
+	list-style: none;
+	padding: var(--wp--preset--spacing--40);
+}
+
+.wp-block-details.is-style-academia-faq > summary::-webkit-details-marker {
+	display: none;
+}
+
+/* A chevron drawn from borders: no icon font, and it inherits currentColor. */
+.wp-block-details.is-style-academia-faq > summary::after {
+	border-bottom: 2px solid currentColor;
+	border-right: 2px solid currentColor;
+	content: "";
+	flex: none;
+	height: 0.5rem;
+	rotate: 45deg;
+	transition: rotate 0.2s ease;
+	width: 0.5rem;
+}
+
+.wp-block-details.is-style-academia-faq[open] > summary::after {
+	rotate: -135deg;
+}
+
+.wp-block-details.is-style-academia-faq > summary:focus-visible {
+	outline: 2px solid var(--wp--preset--color--primary);
+	outline-offset: -2px;
+}
+
+.wp-block-details.is-style-academia-faq > :not(summary) {
+	margin-block: 0;
+	padding: 0 var(--wp--preset--spacing--40) var(--wp--preset--spacing--40);
+}
